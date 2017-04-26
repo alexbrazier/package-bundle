@@ -1,0 +1,50 @@
+{
+  "name": "package-bundle",
+  "version": "0.0.1",
+  "description": "Download npm packages and dependencies as tgz's to then import into package manager or project",
+  "main": "index.js",
+  "preferGlobal": true,
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "mkdirp": "^0.5.1",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.0",
+    "rimraf-promise": "^2.0.0",
+    "semver": "^5.3.0",
+    "tar.gz": "^1.0.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexbrazier/package-bundle.git"
+  },
+  "bugs": {
+    "url": "http://github.com/request/request/issues"
+  },
+  "engines": {
+    "node": ">= 4"
+  },
+  "bin": {
+    "package-bundle": "./bin/package-bundle.js",
+    "pb": "./bin/package-bundle.js"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "package",
+    "bundle",
+    "tar.gz",
+    "archive",
+    "dependencies",
+    "npm",
+    "packages",
+    "yarn",
+    "artifactory"
+  ],
+  "author": "alexbrazier",
+  "license": "MIT"
+}
