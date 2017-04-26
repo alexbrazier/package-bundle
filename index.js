@@ -6,7 +6,8 @@ const mkdirp = require('mkdirp');
 const Promise = require('bluebird');
 const semver = require('semver');
 const targz = require('tar.gz');
-const rimraf = require('rimraf-promise');
+const rimraf = require('rimraf');
+const rm = Promise.promisify(rimraf);
 const writeFile = Promise.promisify(fs.writeFile);
 
 const args = parseArgs(process.argv.slice(2));
@@ -91,7 +92,7 @@ function createArchive() {
 }
 
 function cleanUp() {
-  return rimraf(OUT_DIR);
+  return rm(OUT_DIR);
 }
 
 function saveCache() {

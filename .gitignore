@@ -2,3 +2,5 @@ node_modules/
 .package-bundle
 *.tgz
 .DS_Store
+*.log
+package-bundle-*

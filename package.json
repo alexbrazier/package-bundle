@@ -1,6 +1,6 @@
 {
   "name": "package-bundle",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Download npm packages and dependencies as tgz's to then import into package manager or project",
   "main": "index.js",
   "preferGlobal": true,
@@ -9,7 +9,7 @@
     "mkdirp": "^0.5.1",
     "request": "^2.81.0",
     "request-promise": "^4.2.0",
-    "rimraf-promise": "^2.0.0",
+    "rimraf": "^2.6.1",
     "semver": "^5.3.0",
     "tar.gz": "^1.0.5"
   },
@@ -22,7 +22,7 @@
     "url": "https://github.com/alexbrazier/package-bundle.git"
   },
   "bugs": {
-    "url": "http://github.com/request/request/issues"
+    "url": "http://github.com/alexbrazier/package-bundle/issues"
   },
   "engines": {
     "node": ">= 4"
@@ -32,7 +32,8 @@
     "pb": "./bin/package-bundle.js"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "bin"
   ],
   "keywords": [
     "package",
