@@ -11,15 +11,16 @@ const mkdirp = Promise.promisify(require('mkdirp'));
 
 args
   .version(require('./package').version)
-  .usage('[options] <packages...>')
+  .usage('<packages...> [options] \n  where <packages> are in the format: ' +
+    '[@scope/]<pkg>[@<tag | version | range>]')
   .alias('pb')
   .description('Create a bundle of packages including their dependencies in archive format')
-  .option('-d, --dev', 'Include dev dependencies')
-  .option('-o, --optional', 'Include optional dependencies')
-  .option('-f, --flat', 'Save in a flat file structure, instead of individual folders')
-  .option('-a, --no-archive', 'Leave dependencies in folder, and don\'t archive')
-  .option('-c, --no-cache', 'Don\'t use cache file to avoid repeat downloads')
-  .option('-o, --out-file <file>', 'Output file name')
+  .option('-d, --dev', 'include dev dependencies')
+  .option('-o, --optional', 'include optional dependencies')
+  .option('-f, --flat', 'save in a flat file structure, instead of individual folders')
+  .option('-a, --no-archive', 'leave dependencies in folder, and don\'t archive')
+  .option('-c, --no-cache', 'don\'t use cache file to avoid repeat downloads')
+  .option('-o, --out-file <file>', 'output file name')
   .parse(process.argv);
 
 const packages = args.args;
@@ -50,7 +51,7 @@ if (args.cache) {
   }
 }
 
-Promise.map(packages, (package) => getWithDependencies(package))
+Promise.map(packages, (package) => init(package))
   .then(() => handleFinish())
   .then(() => args.cache && saveCache())
   .then(() => args.archive && createArchive())
@@ -58,22 +59,45 @@ Promise.map(packages, (package) => getWithDependencies(package))
   .then(() => args.archive && cleanUp())
   .catch(err => console.log(err.stack));
 
+function init(package) {
+  let strippedAt = false;
+  let range;
+  if (package.startsWith('@')) {
+    package = package.substring(1);
+    strippedAt = true;
+  }
+  if (package.includes('@')) {
+    const parts = package.split('@');
+    package = parts[0];
+    range = parts[1];//TODO
+  }
+  if (strippedAt) {
+    package = `@${package}`;
+  }
+  return getWithDependencies(package, range);
+}
+
 function getWithDependencies(package, range) {
   return rp(`${REGISTRY_URL}/${package.replace('/', '%2f')}`, { json: true })
     .then(res => {
       const versions = Object.keys(res.versions);
       let maxVersion;
-      try {
-        maxVersion = semver.maxSatisfying(versions, range);
-      } catch (err) {
-        if (versions.indexOf(range) === -1) {
-          console.log(`Unable to find version ${range} in ${package}`);
+      if (range) {
+        try {
+          maxVersion = semver.maxSatisfying(versions, range);
+          if (!maxVersion) {
+            throw new Error(`Unable to find version ${range} in ${package}`);
+          }
+        } catch (err) {
+          if (!versions.includes(range)) {
+            throw err;
+          }
+          maxVersion = range;
         }
-        maxVersion = range;
       }
       const version = range ? maxVersion : res['dist-tags'].latest;
 
-      if (packageCache[package] && packageCache[package].indexOf(version) !== -1) {
+      if (packageCache[package] && packageCache[package].includes(version)) {
         return; // Already have this version
       }
 
