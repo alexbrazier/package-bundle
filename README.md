@@ -30,11 +30,24 @@ You can also download multiple packages by passing in a list:
 package-bundle request bluebird
 ```
 
+# Usage:
+
+```
+Usage: package-bundle|pb [options] <packages...>
+
+Create a bundle of packages including their dependencies in archive format
+
 Options:
 
-`--dev`: include dev dependencies
-`--optional`: include optional dependencies
-
+  -h, --help             output usage information
+  -V, --version          output the version number
+  -d, --dev              Include dev dependencies
+  -o, --optional         Include optional dependencies
+  -f, --flat             Save in a flat file structure, instead of individual folders
+  -a, --no-archive       Leave dependencies in folder, and don't archive
+  -c, --no-cache         Don't use cache file to avoid repeat downloads
+  -o, --out-file <file>  Output file name
+```
 
 ## Features
 

@@ -1,11 +1,12 @@
 {
   "name": "package-bundle",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Download npm packages and dependencies as tgz's to then import into package manager or project",
   "main": "index.js",
   "preferGlobal": true,
   "dependencies": {
     "bluebird": "^3.5.0",
+    "commander": "^2.9.0",
     "mkdirp": "^0.5.1",
     "request": "^2.81.0",
     "request-promise": "^4.2.0",
