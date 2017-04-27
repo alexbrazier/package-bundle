@@ -30,7 +30,7 @@ You can also download multiple packages by passing in a list:
 package-bundle request bluebird
 ```
 
-# Usage:
+## Usage
 
 ```
 Usage: package-bundle|pb [options] <packages...>
@@ -62,13 +62,3 @@ Options:
 Once you have downloaded the packages you want, you can import the archive into an Artifactory npm repository. To do this, select the deploy option on the repo, and upload the whole archive containing all packages. Select the option to "Deploy as Bundle Artifact", which will keep the folder structure in the archive.
 
 Once this is done, you should now be able to npm install from Artifactory, and it should contain all the dependencies that you just downloaded.
-
-
-## TODO
-- [ ] Command line options
-- [ ] Option to disable cache files
-- [ ] Progress bar
-- [ ] Read package.json instead of command line args
-- [ ] Option to disable zipping into one archive
-- [ ] Option to customise output folder structure
-- [ ] Option to specify dependency types
