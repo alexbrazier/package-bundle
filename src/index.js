@@ -10,7 +10,7 @@ const writeFile = Promise.promisify(fs.writeFile);
 const mkdirp = Promise.promisify(require('mkdirp'));
 
 args
-  .version(require('./package').version)
+  .version(require('../package').version)
   .usage('<packages...> [options] \n  where <packages> are in the format: ' +
     '[@scope/]<pkg>[@<tag | version | range>]')
   .alias('pb')
@@ -54,7 +54,7 @@ if (args.cache) {
   }
 }
 
-Promise.mapSeries(packages, (package) => init(package))
+Promise.mapSeries(packages, (pkg) => init(pkg))
   .then(() => handleFinish())
   .then(() => args.cache && saveCache())
   .then(() => args.archive && createArchive())
@@ -62,30 +62,30 @@ Promise.mapSeries(packages, (package) => init(package))
   .then(() => args.archive && cleanUp())
   .catch(err => console.log(err.stack));
 
-function init(package) {
+function init(pgk) {
   let strippedAt = false;
   let range;
-  if (package.startsWith('@')) {
-    package = package.substring(1);
+  if (pgk.startsWith('@')) {
+    pkg = pkg.substring(1);
     strippedAt = true;
   }
-  if (package.includes('@')) {
-    const parts = package.split('@');
-    package = parts[0];
+  if (pkg.includes('@')) {
+    const parts = pkg.split('@');
+    pkg = parts[0];
     range = parts[1];//TODO
   }
   if (strippedAt) {
-    package = `@${package}`;
+    pkg = `@${pkg}`;
   }
-  return getWithDependencies(package, range, { requested: true });
+  return getWithDependencies(pkg, range, { requested: true });
 }
 
-function getMatchingVersion(package, versions, range) {
+function getMatchingVersion(pkg, versions, range) {
   let maxVersion;
   try {
     maxVersion = semver.maxSatisfying(versions, range);
     if (!maxVersion) {
-      throw new Error(`Unable to find version ${range} in ${package}`);
+      throw new Error(`Unable to find version ${range} in ${pkg}`);
     }
   } catch (err) {
     if (!versions.includes(range)) {
@@ -96,29 +96,29 @@ function getMatchingVersion(package, versions, range) {
   return maxVersion;
 }
 
-function getWithDependencies(package, range, { requested } = {}) {
-  return rp(`${REGISTRY_URL}/${package.replace('/', '%2f')}`, { json: true })
+function getWithDependencies(pkg, range, { requested } = {}) {
+  return rp(`${REGISTRY_URL}/${pkg.replace('/', '%2f')}`, { json: true })
     .then(res => {
       const versions = Object.keys(res.versions);
       if ((args.allVersions && requested) || args.allVersionsRecursive) {
         return Promise.mapSeries(versions, (version) => getPackageVersion(res.versions[version]));
       }
-      const version = range ? getMatchingVersion(package, versions, range) : res['dist-tags'].latest;
+      const version = range ? getMatchingVersion(pkg, versions, range) : res['dist-tags'].latest;
 
       const packageObject = res.versions[version];
       return getPackageVersion(packageObject)
     })
     .catch(err => {
       if (err && err.statusCode === 404) {
-        throw new Error(`Unable to find package ${package}`);
+        throw new Error(`Unable to find package ${pkg}`);
       } else {
         console.log(err);
       }
     });
 }
 
-function getPackageVersion(package) {
-  const { name, version, dist, dependencies, devDependencies, optionalDependencies } = package;
+function getPackageVersion(pkg) {
+  const { name, version, dist, dependencies, devDependencies, optionalDependencies } = pkg;
 
   if (packageCache[name] && packageCache[name].includes(version)) {
     return; // Already have this version
@@ -136,11 +136,11 @@ function getPackageVersion(package) {
     });
 }
 
-function getPackage(package, version, tarball) {
-  const folder = args.flat ? OUT_DIR : `${OUT_DIR}/${package}/-`;
-  const strippedName = package.includes('/')
-    ? (args.flat ? package.replace('/', '-') : package.split('/')[1])
-    : package;
+function getPackage(pkg, version, tarball) {
+  const folder = args.flat ? OUT_DIR : `${OUT_DIR}/${pkg}/-`;
+  const strippedName = pkg.includes('/')
+    ? (args.flat ? pkg.replace('/', '-') : pkg.split('/')[1])
+    : pkg;
   return mkdirp(folder)
     .then(() => {
       return new Promise((resolve, reject) => {
