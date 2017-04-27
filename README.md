@@ -2,7 +2,7 @@
 
 [![NPM version](https://img.shields.io/npm/v/package-bundle.svg)](https://www.npmjs.com/package/package-bundle)
 [![Dependency Status](https://david-dm.org/alexbrazier/package-bundle.svg)](https://david-dm.org/alexbrazier/package-bundle)
-[![devDependency Status](https://david-dm.org/alexbrazier/package-bundle/dev-status.svg)](https://david-dm.org/alexbrazier/package-bundle#info=devDependencies)
+[![devDependency Status](https://david-dm.org/alexbrazier/package-bundle/dev-status.svg)](https://david-dm.org/alexbrazier/package-bundle?type=dev)
 
 package-bundle allows you to download npm packages as tar.gz's including their dependencies, and saves them as an archive in the npm folder structure.
 
@@ -33,20 +33,24 @@ package-bundle request bluebird
 ## Usage
 
 ```
-Usage: package-bundle|pb [options] <packages...>
+Usage: index|pb <packages...> [options]
+where <packages> are in the format: [@scope/]<pkg>[@<tag | version | range>]
 
 Create a bundle of packages including their dependencies in archive format
 
 Options:
 
-  -h, --help             output usage information
-  -V, --version          output the version number
-  -d, --dev              Include dev dependencies
-  -o, --optional         Include optional dependencies
-  -f, --flat             Save in a flat file structure, instead of individual folders
-  -a, --no-archive       Leave dependencies in folder, and don't archive
-  -c, --no-cache         Don't use cache file to avoid repeat downloads
-  -o, --out-file <file>  Output file name
+  -h, --help                    output usage information
+  -V, --version                 output the version number
+  -d, --dev                     include dev dependencies
+  -o, --optional                include optional dependencies
+  -f, --flat                    save in a flat file structure, instead of individual folders
+  -z, --no-archive              leave dependencies in folder, and don't archive
+  -x, --no-cache                don't use cache file to avoid repeat downloads
+  -o, --out-file <file>         output file name
+  -a, --all-versions            download all versions of specified packages
+  -A, --all-versions-recursive  download all versions of specified packages and dependencies
+  -c, --concurrency <n>         number of requests to make at the same time - default=50
 ```
 
 ## Features

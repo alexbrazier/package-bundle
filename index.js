@@ -18,9 +18,12 @@ args
   .option('-d, --dev', 'include dev dependencies')
   .option('-o, --optional', 'include optional dependencies')
   .option('-f, --flat', 'save in a flat file structure, instead of individual folders')
-  .option('-a, --no-archive', 'leave dependencies in folder, and don\'t archive')
-  .option('-c, --no-cache', 'don\'t use cache file to avoid repeat downloads')
+  .option('-z, --no-archive', 'leave dependencies in folder, and don\'t archive')
+  .option('-x, --no-cache', 'don\'t use cache file to avoid repeat downloads')
   .option('-o, --out-file <file>', 'output file name')
+  .option('-a, --all-versions', 'download all versions of specified packages')
+  .option('-A, --all-versions-recursive', 'download all versions of specified packages and dependencies')
+  .option('-c, --concurrency <n>', 'number of requests to make at the same time - default=50', parseInt)
   .parse(process.argv);
 
 const packages = args.args;
@@ -51,7 +54,7 @@ if (args.cache) {
   }
 }
 
-Promise.map(packages, (package) => init(package))
+Promise.mapSeries(packages, (package) => init(package))
   .then(() => handleFinish())
   .then(() => args.cache && saveCache())
   .then(() => args.archive && createArchive())
@@ -74,48 +77,36 @@ function init(package) {
   if (strippedAt) {
     package = `@${package}`;
   }
-  return getWithDependencies(package, range);
+  return getWithDependencies(package, range, { requested: true });
 }
 
-function getWithDependencies(package, range) {
+function getMatchingVersion(package, versions, range) {
+  let maxVersion;
+  try {
+    maxVersion = semver.maxSatisfying(versions, range);
+    if (!maxVersion) {
+      throw new Error(`Unable to find version ${range} in ${package}`);
+    }
+  } catch (err) {
+    if (!versions.includes(range)) {
+      throw err;
+    }
+    maxVersion = range;
+  }
+  return maxVersion;
+}
+
+function getWithDependencies(package, range, { requested } = {}) {
   return rp(`${REGISTRY_URL}/${package.replace('/', '%2f')}`, { json: true })
     .then(res => {
       const versions = Object.keys(res.versions);
-      let maxVersion;
-      if (range) {
-        try {
-          maxVersion = semver.maxSatisfying(versions, range);
-          if (!maxVersion) {
-            throw new Error(`Unable to find version ${range} in ${package}`);
-          }
-        } catch (err) {
-          if (!versions.includes(range)) {
-            throw err;
-          }
-          maxVersion = range;
-        }
+      if ((args.allVersions && requested) || args.allVersionsRecursive) {
+        return Promise.mapSeries(versions, (version) => getPackageVersion(res.versions[version]));
       }
-      const version = range ? maxVersion : res['dist-tags'].latest;
-
-      if (packageCache[package] && packageCache[package].includes(version)) {
-        return; // Already have this version
-      }
-
-      packageCache[package] = (packageCache[package] || []).concat(version);
+      const version = range ? getMatchingVersion(package, versions, range) : res['dist-tags'].latest;
 
       const packageObject = res.versions[version];
-
-      const { name, dist, dependencies, devDependencies, optionalDependencies } = packageObject;
-
-      const combinedDependencies = Object.assign({}, dependencies, args.dev && devDependencies, args.optional && optionalDependencies);
-      return getPackage(package, version, dist.tarball)
-        .then(() => {
-          const keys = Object.keys(combinedDependencies);
-          return Promise.map(keys, (key) => {
-            const versionPattern = combinedDependencies[key];
-            return getWithDependencies(key, versionPattern);
-          });
-        });
+      return getPackageVersion(packageObject)
     })
     .catch(err => {
       if (err && err.statusCode === 404) {
@@ -123,6 +114,25 @@ function getWithDependencies(package, range) {
       } else {
         console.log(err);
       }
+    });
+}
+
+function getPackageVersion(package) {
+  const { name, version, dist, dependencies, devDependencies, optionalDependencies } = package;
+
+  if (packageCache[name] && packageCache[name].includes(version)) {
+    return; // Already have this version
+  }
+  packageCache[name] = (packageCache[name] || []).concat(version);
+
+  const combinedDependencies = Object.assign({}, dependencies, args.dev && devDependencies, args.optional && optionalDependencies);
+  return getPackage(name, version, dist.tarball)
+    .then(() => {
+      const keys = Object.keys(combinedDependencies);
+      return Promise.map(keys, (key) => {
+        const versionPattern = combinedDependencies[key];
+        return getWithDependencies(key, versionPattern);
+      }, { concurrency: args.concurrency || 50 });
     });
 }
 
