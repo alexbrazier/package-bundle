@@ -2,13 +2,12 @@ const args = require('commander');
 const rp = require('request-promise');
 const request = require('request');
 const fs = require('fs');
-const mkdirp = require('mkdirp');
 const Promise = require('bluebird');
 const semver = require('semver');
 const targz = require('tar.gz');
-const rimraf = require('rimraf');
-const rm = Promise.promisify(rimraf);
+const rimraf = Promise.promisify(require('rimraf'));
 const writeFile = Promise.promisify(fs.writeFile);
+const mkdirp = Promise.promisify(require('mkdirp'));
 
 args
   .version(require('./package').version)
@@ -29,7 +28,7 @@ if (!packages.length) {
   args.help();
 }
 
-const SKIM_URL = 'https://skimdb.npmjs.com/registry';
+const REGISTRY_URL = 'http://registry.npmjs.org';
 const OUT_DIR = '.package-bundle';
 const OUT_FILE = args.outFile || `package-bundle-${Date.now()}.tgz`;
 const CACHE_FILE = 'package-bundle-cache.json';
@@ -52,16 +51,27 @@ if (args.cache) {
 }
 
 Promise.map(packages, (package) => getWithDependencies(package))
+  .then(() => handleFinish())
   .then(() => args.cache && saveCache())
   .then(() => args.archive && createArchive())
+  .catch(err => console.log(err.message))
   .then(() => args.archive && cleanUp())
-  .catch(err => console.log(err.message));
+  .catch(err => console.log(err.stack));
 
 function getWithDependencies(package, range) {
-  return rp(`${SKIM_URL}/${package}`, { json: true })
+  return rp(`${REGISTRY_URL}/${package.replace('/', '%2f')}`, { json: true })
     .then(res => {
       const versions = Object.keys(res.versions);
-      const version = range ? semver.maxSatisfying(versions, range) : res['dist-tags'].latest;
+      let maxVersion;
+      try {
+        maxVersion = semver.maxSatisfying(versions, range);
+      } catch (err) {
+        if (versions.indexOf(range) === -1) {
+          console.log(`Unable to find version ${range} in ${package}`);
+        }
+        maxVersion = range;
+      }
+      const version = range ? maxVersion : res['dist-tags'].latest;
 
       if (packageCache[package] && packageCache[package].indexOf(version) !== -1) {
         return; // Already have this version
@@ -74,8 +84,7 @@ function getWithDependencies(package, range) {
       const { name, dist, dependencies, devDependencies, optionalDependencies } = packageObject;
 
       const combinedDependencies = Object.assign({}, dependencies, args.dev && devDependencies, args.optional && optionalDependencies);
-
-      return getPackage(name, version, dist.tarball)
+      return getPackage(package, version, dist.tarball)
         .then(() => {
           const keys = Object.keys(combinedDependencies);
           return Promise.map(keys, (key) => {
@@ -85,39 +94,42 @@ function getWithDependencies(package, range) {
         });
     })
     .catch(err => {
-      if (err.statusCode === 404) {
+      if (err && err.statusCode === 404) {
         throw new Error(`Unable to find package ${package}`);
+      } else {
+        console.log(err);
       }
     });
 }
 
 function getPackage(package, version, tarball) {
-  return new Promise((resolve, reject) => {
-    request(tarball)
-      .on('response', res => {
-        const folder = args.flat ? OUT_DIR : `${OUT_DIR}/${package}/-`;
-        mkdirp(folder, (err) => {
-          if (err) {
-            return reject(err);
-          }
-          res.pipe(fs.createWriteStream(`${folder}/${package}-${version}.tgz`));
-        });
-      })
-      .on('end', res => resolve(res))
-      .on('error', err => reject(err));
-  });
+  const folder = args.flat ? OUT_DIR : `${OUT_DIR}/${package}/-`;
+  const strippedName = package.includes('/')
+    ? (args.flat ? package.replace('/', '-') : package.split('/')[1])
+    : package;
+  return mkdirp(folder)
+    .then(() => {
+      return new Promise((resolve, reject) => {
+        request(tarball)
+          .on('error', () => reject())
+          .pipe(fs.createWriteStream(`${folder}/${strippedName}-${version}.tgz`))
+          .on('finish', () => resolve())
+      });
+    });
 }
 
-function createArchive() {
-  if (fs.existsSync(OUT_DIR)) {
-    return targz({}, { fromBase: true }).compress(OUT_DIR, OUT_FILE);
-  } else {
-    console.log('Nothing was downloaded');
+function handleFinish() {
+  if (!fs.existsSync(OUT_DIR)) {
+    throw new Error(`No new packages were downloaded.${args.cache && ' Try running with the `--no-cache` option'}`);
   }
 }
 
+function createArchive() {
+  return targz({}, { fromBase: true }).compress(OUT_DIR, OUT_FILE);
+}
+
 function cleanUp() {
-  return rm(OUT_DIR);
+  return rimraf(OUT_DIR);
 }
 
 function saveCache() {
