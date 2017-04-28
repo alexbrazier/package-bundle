@@ -62,10 +62,10 @@ Promise.mapSeries(packages, (pkg) => init(pkg))
   .then(() => args.archive && cleanUp())
   .catch(err => console.log(err.stack));
 
-function init(pgk) {
+function init(pkg) {
   let strippedAt = false;
   let range;
-  if (pgk.startsWith('@')) {
+  if (pkg.startsWith('@')) {
     pkg = pkg.substring(1);
     strippedAt = true;
   }

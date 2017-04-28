@@ -1,6 +1,6 @@
 {
   "name": "package-bundle",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Download npm packages and dependencies as tgz's to then import into package manager or project",
   "main": "lib/index.js",
   "preferGlobal": true,
