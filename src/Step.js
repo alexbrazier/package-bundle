@@ -4,8 +4,8 @@ import 'colors';
 
 export default class Step {
   static clearLine() {
-    process.stdout.clearLine();
-    process.stdout.cursorTo(0);
+    readline.clearLine(process.stdout, 0);
+    readline.cursorTo(process.stdout, 0);
   }
 
   get stepInfo() {
