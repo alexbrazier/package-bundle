@@ -9,10 +9,12 @@ import PBError from './PBError';
 
 const OUT_DIR = '.package-bundle';
 
+args._name = 'package-bundle'; // eslint-disable-line no-underscore-dangle
+
 args
   .version(require('../package').version)
   .usage('<packages...> [options] \n  where <packages> are in the format: ' +
-    '[@scope/]<pkg>[@<tag | version | range>]')
+    '[@scope/]<pkg>[@<version>]')
   .alias('pb')
   .description('Create a bundle of packages including their dependencies in archive format')
   .option('-d, --dev', 'include dev dependencies')
@@ -25,7 +27,6 @@ args
   .option('-A, --all-versions-recursive', 'download all versions of specified packages and dependencies')
   .option('-c, --concurrency <n>', 'number of requests to make at the same time - default=50', parseInt)
   .parse(process.argv);
-
 
 const resolver = new Resolver(args);
 const downloader = new Downloader(args);
