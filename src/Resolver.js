@@ -9,6 +9,7 @@ const writeFile = Promise.promisify(fs.writeFile);
 
 const REGISTRY_URL = 'http://registry.npmjs.org';
 const CACHE_FILE = 'package-bundle-cache.json';
+const PACKAGE_JSON = 'package.json';
 
 export default class Resolver extends Step {
   static getMatchingVersion(pkg, versions, range) {
@@ -41,7 +42,7 @@ export default class Resolver extends Step {
     this.packages = args.args;
 
     if (!this.packages.length) {
-      args.help();
+      this.checkPackageJson();
     }
 
     if (args.cache) {
@@ -61,6 +62,28 @@ export default class Resolver extends Step {
     return Promise.mapSeries(this.packages, pkg => this.processInput(pkg))
       .then(() => this.args.cache && this.saveCache())
       .then(() => this.getResult());
+  }
+
+  checkPackageJson() {
+    try {
+      const packageFile = fs.readFileSync(PACKAGE_JSON);
+      const { dependencies, devDependencies, optionalDependencies } = JSON.parse(packageFile);
+
+      const combinedDependencies = Object.assign(
+        {},
+        dependencies,
+        this.args.dev && devDependencies,
+        this.args.optional && optionalDependencies
+      );
+
+      this.packages = Object.entries(combinedDependencies).map(([k, v]) => `${k}@${v}`);
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        this.args.help();
+      } else {
+        throw err;
+      }
+    }
   }
 
   getResult() {
@@ -143,8 +166,8 @@ export default class Resolver extends Step {
     const combinedDependencies = Object.assign(
       {},
       dependencies,
-      this.args.dev && devDependencies,
-      this.args.optional && optionalDependencies
+      this.args.devRecursive && devDependencies,
+      this.args.optionalRecursive && optionalDependencies
     );
 
     const keys = Object.keys(combinedDependencies);

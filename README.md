@@ -32,11 +32,14 @@ You can also download multiple packages by passing in a list:
 package-bundle request bluebird
 ```
 
+If no packages are entered then it will check for a package.json file, and read in the dependencies.
+
 ## Usage
 
 ```
-Usage: package-bundle|pb <packages...> [options]
+Usage: package-bundle|pb [packages...] [options]
 where <packages> are in the format: [@scope/]<pkg>[@<version>]
+If no packages are provided it will check for a package.json
 
 Create a bundle of packages including their dependencies in archive format
 
@@ -44,12 +47,14 @@ Options:
 
   -h, --help                    output usage information
   -V, --version                 output the version number
-  -d, --dev                     include dev dependencies
-  -o, --optional                include optional dependencies
+  -d, --no-dev                  ignore dev dependencies in package.json
+  -o, --no-optional             ignore optional dependencies in package.json
+  -D, --dev-recursive           include all dev dependencies recursively
+  -O, --optional-recursive      include all optional dependencies recursively
   -f, --flat                    save in a flat file structure, instead of individual folders
   -z, --no-archive              leave dependencies in folder, and don't archive
   -x, --no-cache                don't use cache file to avoid repeat downloads
-  -O, --out-file <file>         output file name
+  -F, --out-file <file>         output file name
   -a, --all-versions            download all versions of specified packages
   -A, --all-versions-recursive  download all versions of specified packages and dependencies
   -c, --concurrency <n>         number of requests to make at the same time - default=50
@@ -62,6 +67,8 @@ Options:
 * Cache previous downloads, so you only download dependencies once
 * Download all package dependencies
 * Maintains npm registry folder structure to upload to package manager
+* Specify version of package
+* Read packages from package.json
 
 
 ## Importing into Artifactory
