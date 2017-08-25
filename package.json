@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "preferGlobal": true,
   "dependencies": {
+    "babel-runtime": "^6.26.0",
     "bluebird": "^3.5.0",
     "colors": "^1.1.2",
     "commander": "^2.9.0",
