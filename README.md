@@ -1,5 +1,6 @@
 # package-bundle
 
+[![Build Status](https://travis-ci.org/alexbrazier/package-bundle.svg?branch=master)](https://travis-ci.org/alexbrazier/package-bundle)
 [![NPM version](https://img.shields.io/npm/v/package-bundle.svg)](https://www.npmjs.com/package/package-bundle)
 [![Downloads](https://img.shields.io/npm/dt/package-bundle.svg)](https://www.npmjs.com/package/package-bundle)
 [![Dependency Status](https://img.shields.io/david/alexbrazier/package-bundle.svg)](https://david-dm.org/alexbrazier/package-bundle)

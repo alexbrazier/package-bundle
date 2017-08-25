@@ -28,10 +28,10 @@ export default class Downloader extends Step {
     this.downloads = downloads;
 
     return Promise.map(
-        this.downloads.entries(),
-        ([/* key */, { name, version, dist }]) => this.getPackage(name, version, dist),
-        { concurrency: this.args.concurrency || 50 }
-      )
+      this.downloads.entries(),
+      ([/* key */, { name, version, dist }]) => this.getPackage(name, version, dist),
+      { concurrency: this.args.concurrency || 50 }
+    )
       .then(() => this.complete('Downloaded packages'));
   }
 
