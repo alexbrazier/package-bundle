@@ -19,7 +19,8 @@
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-plugin-transform-builtin-extend": "^1.1.2",
-    "babel-preset-es2015": "^6.24.1",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-es2017": "^6.24.1",
     "eslint": "^3.19.0",
     "eslint-config-airbnb-base": "^11.1.3",
     "eslint-plugin-import": "^2.2.0"
@@ -27,6 +28,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "babel-node src",
+    "prebuild": "rimraf lib/*",
     "build": "babel -d lib/ src/",
     "prepublish": "yarn lint && yarn build",
     "lint": "eslint src"
