@@ -1,6 +1,6 @@
 {
   "name": "package-bundle",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Download npm packages and dependencies as tgz's to then import into package manager or project",
   "main": "lib/index.js",
   "preferGlobal": true,
@@ -26,8 +26,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "babel -d lib/ src/",
-    "prepublish": "npm run lint && npm run compile",
+    "start": "babel-node src",
+    "build": "babel -d lib/ src/",
+    "prepublish": "yarn lint && yarn build",
     "lint": "eslint src"
   },
   "repository": {

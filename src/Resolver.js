@@ -160,7 +160,7 @@ export default class Resolver extends Step {
       return false;
     }
     const key = `${name}:${version}`;
-    this.downloads.set(key, { name, version, tarball: dist.tarball });
+    this.downloads.set(key, { name, version, dist });
     Resolver.logPackage(key);
 
     const combinedDependencies = Object.assign(

@@ -3,6 +3,9 @@ import fs from 'fs';
 import Promise from 'bluebird';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
+import crypto from 'crypto';
+import { PassThrough } from 'stream';
+import PBError from './PBError';
 import Step from './Step';
 
 const rm = Promise.promisify(rimraf);
@@ -26,30 +29,42 @@ export default class Downloader extends Step {
 
     return Promise.map(
         this.downloads.entries(),
-        ([/* key */, { name, version, tarball }]) => this.getPackage(name, version, tarball),
+        ([/* key */, { name, version, dist }]) => this.getPackage(name, version, dist),
         { concurrency: this.args.concurrency || 50 }
       )
       .then(() => this.complete('Downloaded packages'));
   }
 
-  getPackage(pkg, version, tarball) {
+  getPackage(pkg, version, { shasum, tarball }) {
     const outDir = this.args.archive ? OUT_DIR : OUT_DIR.substring(1);
     const folder = this.args.flat ? outDir : `${outDir}/${pkg}/-`;
     const stripped = pkg.includes('/') && (this.args.flat ? pkg.replace('/', '-') : pkg.split('/')[1]);
     const strippedName = stripped || pkg;
+    const hash = crypto.createHash('sha1');
+    hash.setEncoding('hex');
     return mkdir(folder)
       .then(() => new Promise((resolve, reject) => {
+        const hashPass = new PassThrough; // eslint-disable-line
+
+        hashPass
+          .pipe(hash)
+          .on('finish', () => {
+            const hashResult = hash.read();
+            if (hashResult !== shasum) {
+              reject(new PBError(`sha1 hashes do not match for ${pkg}@${version}\nDownloaded (${hashResult})} does not equal provided (${shasum})`));
+            } else {
+              this.tick(1);
+              resolve();
+            }
+          });
         request(tarball)
           .on('error', () => reject())
           .on('response', (res) => {
             const size = parseInt(res.headers['content-length'], 10);
             this.totalSize += size;
           })
-          .pipe(fs.createWriteStream(`${folder}/${strippedName}-${version}.tgz`))
-          .on('finish', () => {
-            this.tick(1);
-            resolve();
-          });
+          .pipe(hashPass)
+          .pipe(fs.createWriteStream(`${folder}/${strippedName}-${version}.tgz`));
       }));
   }
 }
