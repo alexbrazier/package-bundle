@@ -1,5 +1,5 @@
 import fs from 'fs';
-import targz from 'tar.gz';
+import tar from 'tar';
 import Step from './Step';
 
 const OUT_DIR = '.package-bundle';
@@ -18,8 +18,11 @@ export default class Archiver extends Step {
       const change = cur.size - pre.size;
       this.tick(change);
     });
-    return targz({}, { fromBase: true })
-      .compress(OUT_DIR, outFile)
+    return tar.create({
+      gzip: true,
+      file: OUT_FILE,
+      cwd: OUT_DIR
+    }, ['.'])
       .then(() => fs.unwatchFile(outFile))
       .then(() => this.complete(`Created archive at "${outFile}"`));
   }
