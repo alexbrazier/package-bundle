@@ -52,7 +52,6 @@ Create a bundle of packages including their dependencies in archive format
 
 Options:
 
-  -h, --help                    output usage information
   -V, --version                 output the version number
   -d, --no-dev                  ignore dev dependencies in package.json
   -o, --no-optional             ignore optional dependencies in package.json
@@ -65,6 +64,8 @@ Options:
   -a, --all-versions            download all versions of specified packages
   -A, --all-versions-recursive  download all versions of specified packages and dependencies
   -c, --concurrency <n>         number of requests to make at the same time - default=50
+  -r, --registry <registry>     specify a registry
+  -h, --help                    output usage information
 
 ```
 

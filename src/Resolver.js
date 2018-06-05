@@ -155,7 +155,9 @@ export default class Resolver extends Step {
   }
 
   getPackageVersion(pkg) {
-    const { name, version, dist, dependencies, devDependencies, optionalDependencies } = pkg;
+    const {
+      name, version, dist, dependencies, devDependencies, optionalDependencies
+    } = pkg;
 
     if (this.isCached(name, version)) {
       return false;

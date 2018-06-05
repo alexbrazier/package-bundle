@@ -1,4 +1,5 @@
 import 'colors';
+import 'babel-polyfill';
 import args from 'commander';
 import fs from 'fs';
 import Promise from 'bluebird';
