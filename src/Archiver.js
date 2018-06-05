@@ -20,7 +20,7 @@ export default class Archiver extends Step {
     });
     return tar.create({
       gzip: true,
-      file: OUT_FILE,
+      file: outFile,
       cwd: OUT_DIR
     }, ['.'])
       .then(() => fs.unwatchFile(outFile))
