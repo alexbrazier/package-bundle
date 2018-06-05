@@ -28,6 +28,7 @@ args
   .option('-a, --all-versions', 'download all versions of specified packages')
   .option('-A, --all-versions-recursive', 'download all versions of specified packages and dependencies')
   .option('-c, --concurrency <n>', 'number of requests to make at the same time - default=50', parseInt)
+  .option('-r, --registry <registry>', 'specify a registry')
   .parse(process.argv);
 
 const resolver = new Resolver(args);

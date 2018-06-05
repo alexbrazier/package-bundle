@@ -116,10 +116,11 @@ export default class Resolver extends Step {
   }
 
   resolveDependencies(pkg, range, { requested } = {}) {
+    const regUrl = this.args.registry || REGISTRY_URL;
     if (this.alreadyHaveValidVersion(pkg, range)) {
       return false;
     }
-    return rp(`${REGISTRY_URL}/${pkg.replace('/', '%2f')}`, { json: true })
+    return rp(`${regUrl}/${pkg.replace('/', '%2f')}`, { json: true })
       .then((res) => {
         if (!res.versions) {
           throw new PBError(`Unable to find "${pkg}" version - ignoring.`, 'error');
