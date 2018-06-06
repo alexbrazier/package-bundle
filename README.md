@@ -65,6 +65,8 @@ Options:
   -A, --all-versions-recursive  download all versions of specified packages and dependencies
   -c, --concurrency <n>         number of requests to make at the same time - default=50
   -r, --registry <registry>     specify a registry
+  -b, --basic-auth <hash>       specify a basic auth hash
+  -t, --auth-token <token>      specify an auth token
   -h, --help                    output usage information
 
 ```

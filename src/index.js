@@ -31,7 +31,7 @@ args
   .option('-c, --concurrency <n>', 'number of requests to make at the same time - default=50', parseInt)
   .option('-r, --registry <registry>', 'specify a registry')
   .option('-b, --basic-auth <hash>', 'Basic auth hash')
-  .option('-t, --auth-token <token>', 'Basic auth hash')
+  .option('-t, --auth-token <token>', 'Auth token')
   .parse(process.argv);
 
 const resolver = new Resolver(args);
