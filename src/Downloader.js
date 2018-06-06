@@ -41,6 +41,8 @@ export default class Downloader extends Step {
     const stripped = pkg.includes('/') && (this.args.flat ? pkg.replace('/', '-') : pkg.split('/')[1]);
     const strippedName = stripped || pkg;
     const hash = crypto.createHash('sha1');
+    const reqOptions = {};
+    let authHeader = '';
     hash.setEncoding('hex');
     return mkdir(folder)
       .then(() => new Promise((resolve, reject) => {
@@ -57,7 +59,16 @@ export default class Downloader extends Step {
               resolve();
             }
           });
-        request(tarball)
+        reqOptions.url = tarball;
+        if (this.args.basicAuth) {
+          authHeader = `Basic ${this.args.basicAuth}`;
+        } else if (this.args.authToken) {
+          authHeader = `Bearer ${this.args.authToken}`;
+        }
+        if (authHeader !== '') {
+          reqOptions.headers = { Authorization: authHeader };
+        }
+        request(reqOptions)
           .on('error', () => reject())
           .on('response', (res) => {
             const size = parseInt(res.headers['content-length'], 10);

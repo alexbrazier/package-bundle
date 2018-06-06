@@ -118,14 +118,16 @@ export default class Resolver extends Step {
   resolveDependencies(pkg, range, { requested } = {}) {
     const regUrl = this.args.registry || REGISTRY_URL;
     const reqOptions = {};
-    let header = '';
+    let authHeader = '';
     if (this.args.basicAuth) {
-      header = `Basic ${this.args.basicAuth}`;
+      authHeader = `Basic ${this.args.basicAuth}`;
     } else if (this.args.authToken) {
-      header = `Bearer ${this.args.authToken}`;
+      authHeader = `Bearer ${this.args.authToken}`;
     }
     reqOptions.json = true;
-    reqOptions.headers = { Authorization: header };
+    if (authHeader !== '') {
+      reqOptions.headers = { Authorization: authHeader };
+    }
     if (this.alreadyHaveValidVersion(pkg, range)) {
       return false;
     }
