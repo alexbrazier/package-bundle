@@ -117,10 +117,19 @@ export default class Resolver extends Step {
 
   resolveDependencies(pkg, range, { requested } = {}) {
     const regUrl = this.args.registry || REGISTRY_URL;
+    const reqOptions = {};
+    let header = '';
+    if (this.args.basicAuth) {
+      header = `Basic ${this.args.basicAuth}`;
+    } else if (this.args.authToken) {
+      header = `Bearer ${this.args.authToken}`;
+    }
+    reqOptions.json = true;
+    reqOptions.headers = { Authorization: header };
     if (this.alreadyHaveValidVersion(pkg, range)) {
       return false;
     }
-    return rp(`${regUrl}/${pkg.replace('/', '%2f')}`, { json: true })
+    return rp(`${regUrl}/${pkg.replace('/', '%2f')}`, reqOptions)
       .then((res) => {
         if (!res.versions) {
           throw new PBError(`Unable to find "${pkg}" version - ignoring.`, 'error');
