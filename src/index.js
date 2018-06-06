@@ -30,6 +30,7 @@ args
   .option('-A, --all-versions-recursive', 'download all versions of specified packages and dependencies')
   .option('-c, --concurrency <n>', 'number of requests to make at the same time - default=50', parseInt)
   .option('-r, --registry <registry>', 'specify a registry')
+  .option('-p, --proxy <url>', 'proxy url')
   .parse(process.argv);
 
 const resolver = new Resolver(args);

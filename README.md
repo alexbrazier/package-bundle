@@ -65,6 +65,7 @@ Options:
   -A, --all-versions-recursive  download all versions of specified packages and dependencies
   -c, --concurrency <n>         number of requests to make at the same time - default=50
   -r, --registry <registry>     specify a registry
+  -p, --proxy <url>             proxy url
   -h, --help                    output usage information
 
 ```
