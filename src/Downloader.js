@@ -38,6 +38,7 @@ export default class Downloader extends Step {
   getPackage(pkg, version, { shasum, tarball }) {
     const outDir = this.args.archive ? OUT_DIR : OUT_DIR.substring(1);
     const folder = this.args.flat ? outDir : `${outDir}/${pkg}/-`;
+    const proxy = this.args.proxy || null;
     const stripped = pkg.includes('/') && (this.args.flat ? pkg.replace('/', '-') : pkg.split('/')[1]);
     const strippedName = stripped || pkg;
     const hash = crypto.createHash('sha1');
@@ -57,7 +58,7 @@ export default class Downloader extends Step {
               resolve();
             }
           });
-        request(tarball)
+        request.get(tarball, { proxy })
           .on('error', () => reject())
           .on('response', (res) => {
             const size = parseInt(res.headers['content-length'], 10);
