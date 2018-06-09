@@ -117,6 +117,7 @@ export default class Resolver extends Step {
 
   resolveDependencies(pkg, range, { requested } = {}) {
     const regUrl = this.args.registry || REGISTRY_URL;
+    const proxy = this.args.proxy || null;
     const reqOptions = {};
     let authHeader = '';
     if (this.args.basicAuth) {
@@ -130,6 +131,9 @@ export default class Resolver extends Step {
     }
     if (this.alreadyHaveValidVersion(pkg, range)) {
       return false;
+    }
+    if (proxy) {
+      reqOptions.proxy = proxy;
     }
     return rp(`${regUrl}/${pkg.replace('/', '%2f')}`, reqOptions)
       .then((res) => {

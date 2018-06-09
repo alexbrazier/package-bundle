@@ -67,8 +67,9 @@ Options:
   -r, --registry <registry>     specify a registry
   -b, --basic-auth <hash>       specify a basic auth hash
   -t, --auth-token <token>      specify an auth token
+  -p, --proxy <url>             proxy url
+  --insecure                    ignore TLS (SSL) certificate errors
   -h, --help                    output usage information
-
 ```
 
 ## Features
