@@ -36,7 +36,6 @@ export default class Downloader extends Step {
   }
 
   getPackage(pkg, version, { shasum, tarball }) {
-    const tarballUri = tarball ? tarball.replace(/https:\/\/registry.npmjs.org/i, 'http://registry.npmjs.org') : tarball;
     const outDir = this.args.archive ? OUT_DIR : OUT_DIR.substring(1);
     const folder = this.args.flat ? outDir : `${outDir}/${pkg}/-`;
     const proxy = this.args.proxy || null;
@@ -59,7 +58,7 @@ export default class Downloader extends Step {
               resolve();
             }
           });
-        request.get(tarballUri, { proxy })
+        request.get(tarball, { proxy })
           .on('error', () => reject())
           .on('response', (res) => {
             const size = parseInt(res.headers['content-length'], 10);
