@@ -31,6 +31,7 @@ args
   .option('-c, --concurrency <n>', 'number of requests to make at the same time - default=50', parseInt)
   .option('-r, --registry <registry>', 'specify a registry')
   .option('-p, --proxy <url>', 'proxy url')
+  .option('--insecure', 'ignore TLS (SSL) certificate errors')
   .parse(process.argv);
 
 const resolver = new Resolver(args);
@@ -42,6 +43,9 @@ function init() {
   return Promise.try(() => {
     if (fs.existsSync(OUT_DIR)) {
       throw new PBError(`Output dir "${OUT_DIR}" already exists.`, 'error');
+    } else if (args.insecure) {
+      // Workaround for self-signed certificates.
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     }
   });
 }
