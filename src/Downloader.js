@@ -8,6 +8,8 @@ import { PassThrough } from 'stream';
 import PBError from './PBError';
 import Step from './Step';
 
+const PBRequest = require('./PBRequest');
+
 const rm = Promise.promisify(rimraf);
 const mkdir = Promise.promisify(mkdirp);
 const OUT_DIR = '.package-bundle';
@@ -38,12 +40,10 @@ export default class Downloader extends Step {
   getPackage(pkg, version, { shasum, tarball }) {
     const outDir = this.args.archive ? OUT_DIR : OUT_DIR.substring(1);
     const folder = this.args.flat ? outDir : `${outDir}/${pkg}/-`;
-    const proxy = this.args.proxy || null;
     const stripped = pkg.includes('/') && (this.args.flat ? pkg.replace('/', '-') : pkg.split('/')[1]);
     const strippedName = stripped || pkg;
     const hash = crypto.createHash('sha1');
-    const reqOptions = {};
-    let authHeader = '';
+    const reqOptions = PBRequest.genRequest(this.args, tarball);
     hash.setEncoding('hex');
     return mkdir(folder)
       .then(() => new Promise((resolve, reject) => {
@@ -60,18 +60,6 @@ export default class Downloader extends Step {
               resolve();
             }
           });
-        reqOptions.url = tarball;
-        if (this.args.basicAuth) {
-          authHeader = `Basic ${this.args.basicAuth}`;
-        } else if (this.args.authToken) {
-          authHeader = `Bearer ${this.args.authToken}`;
-        }
-        if (authHeader !== '') {
-          reqOptions.headers = { Authorization: authHeader };
-        }
-        if (proxy) {
-          reqOptions.proxy = proxy;
-        }
         request(reqOptions)
           .on('error', () => reject())
           .on('response', (res) => {

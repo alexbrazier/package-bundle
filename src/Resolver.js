@@ -5,6 +5,8 @@ import fs from 'fs';
 import Step from './Step';
 import PBError from './PBError';
 
+const PBRequest = require('./PBRequest');
+
 const writeFile = Promise.promisify(fs.writeFile);
 
 const REGISTRY_URL = 'http://registry.npmjs.org';
@@ -117,23 +119,10 @@ export default class Resolver extends Step {
 
   resolveDependencies(pkg, range, { requested } = {}) {
     const regUrl = this.args.registry || REGISTRY_URL;
-    const proxy = this.args.proxy || null;
-    const reqOptions = {};
-    let authHeader = '';
-    if (this.args.basicAuth) {
-      authHeader = `Basic ${this.args.basicAuth}`;
-    } else if (this.args.authToken) {
-      authHeader = `Bearer ${this.args.authToken}`;
-    }
+    const reqOptions = PBRequest.genRequest(this.args);
     reqOptions.json = true;
-    if (authHeader !== '') {
-      reqOptions.headers = { Authorization: authHeader };
-    }
     if (this.alreadyHaveValidVersion(pkg, range)) {
       return false;
-    }
-    if (proxy) {
-      reqOptions.proxy = proxy;
     }
     return rp(`${regUrl}/${pkg.replace('/', '%2f')}`, reqOptions)
       .then((res) => {
