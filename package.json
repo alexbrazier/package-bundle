@@ -41,7 +41,7 @@
     "url": "https://github.com/alexbrazier/package-bundle.git"
   },
   "bugs": {
-    "url": "http://github.com/alexbrazier/package-bundle/issues"
+    "url": "https://github.com/alexbrazier/package-bundle/issues"
   },
   "engines": {
     "node": ">= 4"

@@ -8,7 +8,7 @@ import PBRequest from './PBRequest';
 
 const writeFile = Promise.promisify(fs.writeFile);
 
-const REGISTRY_URL = 'http://registry.npmjs.org';
+const REGISTRY_URL = 'https://registry.npmjs.org';
 const CACHE_FILE = 'package-bundle-cache.json';
 const PACKAGE_JSON = 'package.json';
 
