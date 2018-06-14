@@ -31,6 +31,8 @@ args
   .option('-c, --concurrency <n>', 'number of requests to make at the same time - default=50', parseInt)
   .option('-r, --registry <registry>', 'specify a registry')
   .option('-p, --proxy <url>', 'proxy url')
+  .option('--basic-auth <hash>', 'Basic auth hash')
+  .option('--auth-token <token>', 'Auth token')
   .option('--insecure', 'ignore TLS (SSL) certificate errors')
   .parse(process.argv);
 

@@ -66,9 +66,10 @@ Options:
   -c, --concurrency <n>         number of requests to make at the same time - default=50
   -r, --registry <registry>     specify a registry
   -p, --proxy <url>             proxy url
+  --basic-auth <hash>           Basic auth hash
+  --auth-token <token>          Auth token
   --insecure                    ignore TLS (SSL) certificate errors
   -h, --help                    output usage information
-
 ```
 
 ## Features

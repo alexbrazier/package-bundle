@@ -6,6 +6,7 @@ import rimraf from 'rimraf';
 import crypto from 'crypto';
 import { PassThrough } from 'stream';
 import PBError from './PBError';
+import PBRequest from './PBRequest';
 import Step from './Step';
 
 const rm = Promise.promisify(rimraf);
@@ -38,10 +39,10 @@ export default class Downloader extends Step {
   getPackage(pkg, version, { shasum, tarball }) {
     const outDir = this.args.archive ? OUT_DIR : OUT_DIR.substring(1);
     const folder = this.args.flat ? outDir : `${outDir}/${pkg}/-`;
-    const proxy = this.args.proxy || null;
     const stripped = pkg.includes('/') && (this.args.flat ? pkg.replace('/', '-') : pkg.split('/')[1]);
     const strippedName = stripped || pkg;
     const hash = crypto.createHash('sha1');
+    const reqOptions = PBRequest(this.args, tarball);
     hash.setEncoding('hex');
     return mkdir(folder)
       .then(() => new Promise((resolve, reject) => {
@@ -58,7 +59,7 @@ export default class Downloader extends Step {
               resolve();
             }
           });
-        request.get(tarball, { proxy })
+        request(reqOptions)
           .on('error', () => reject())
           .on('response', (res) => {
             const size = parseInt(res.headers['content-length'], 10);

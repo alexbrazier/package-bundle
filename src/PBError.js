@@ -5,7 +5,7 @@ export default class PBError extends Error {
     return `${`${this.type}`[this.type]}: ${this.message}`;
   }
 
-  constructor(message, type) {
+  constructor(message, type = 'error') {
     super(message);
     this.type = type;
     this.name = 'PBError';

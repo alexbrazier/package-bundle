@@ -4,6 +4,7 @@ import semver from 'semver';
 import fs from 'fs';
 import Step from './Step';
 import PBError from './PBError';
+import PBRequest from './PBRequest';
 
 const writeFile = Promise.promisify(fs.writeFile);
 
@@ -117,11 +118,12 @@ export default class Resolver extends Step {
 
   resolveDependencies(pkg, range, { requested } = {}) {
     const regUrl = this.args.registry || REGISTRY_URL;
-    const proxy = this.args.proxy || null;
+    const reqOptions = PBRequest(this.args);
+    reqOptions.json = true;
     if (this.alreadyHaveValidVersion(pkg, range)) {
       return false;
     }
-    return rp(`${regUrl}/${pkg.replace('/', '%2f')}`, { json: true, proxy })
+    return rp(`${regUrl}/${pkg.replace('/', '%2f')}`, reqOptions)
       .then((res) => {
         if (!res.versions) {
           throw new PBError(`Unable to find "${pkg}" version - ignoring.`, 'error');
