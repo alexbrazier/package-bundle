@@ -6,9 +6,8 @@ import rimraf from 'rimraf';
 import crypto from 'crypto';
 import { PassThrough } from 'stream';
 import PBError from './PBError';
+import PBRequest from './PBRequest';
 import Step from './Step';
-
-const PBRequest = require('./PBRequest');
 
 const rm = Promise.promisify(rimraf);
 const mkdir = Promise.promisify(mkdirp);
@@ -43,7 +42,7 @@ export default class Downloader extends Step {
     const stripped = pkg.includes('/') && (this.args.flat ? pkg.replace('/', '-') : pkg.split('/')[1]);
     const strippedName = stripped || pkg;
     const hash = crypto.createHash('sha1');
-    const reqOptions = PBRequest.genRequest(this.args, tarball);
+    const reqOptions = PBRequest(this.args, tarball);
     hash.setEncoding('hex');
     return mkdir(folder)
       .then(() => new Promise((resolve, reject) => {

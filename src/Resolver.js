@@ -4,8 +4,7 @@ import semver from 'semver';
 import fs from 'fs';
 import Step from './Step';
 import PBError from './PBError';
-
-const PBRequest = require('./PBRequest');
+import PBRequest from './PBRequest';
 
 const writeFile = Promise.promisify(fs.writeFile);
 
@@ -119,7 +118,7 @@ export default class Resolver extends Step {
 
   resolveDependencies(pkg, range, { requested } = {}) {
     const regUrl = this.args.registry || REGISTRY_URL;
-    const reqOptions = PBRequest.genRequest(this.args);
+    const reqOptions = PBRequest(this.args);
     reqOptions.json = true;
     if (this.alreadyHaveValidVersion(pkg, range)) {
       return false;
