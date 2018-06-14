@@ -12,7 +12,9 @@ export default function PBRequest(args, url) {
   }
 
   if (basicAuth || authToken) {
-    reqOptions.headers = { Authorization: basicAuth ? `Basic ${basicAuth}` : `Bearer ${authToken}` };
+    reqOptions.headers = {
+      Authorization: basicAuth ? `Basic ${basicAuth}` : `Bearer ${authToken}`
+    };
   }
 
   if (proxy) {
